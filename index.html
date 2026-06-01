@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KOCUMO — Paperclip Agent Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   KOCUMO Dashboard — Google Stitch DESIGN.md v2.0 Implementation
+   Pure HTML/CSS/JS — Zero dependencies | No build step
+   ============================================================ */
+
+:root {
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1a2332;
+  --bg-elevated: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #3b82f6;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-amber: #f59e0b;
+  --accent-purple: #8b5cf6;
+  --border: #1e293b;
+  --border-light: #334155;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --sidebar-w: 240px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: flex;
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+  transition: transform 250ms ease-out;
+}
+
+.sidebar-brand {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.sidebar-brand .logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 16px; color: #fff;
+}
+
+.sidebar-brand .name {
+  font-size: 18px; font-weight: 700; color: var(--text-primary);
+  letter-spacing: 1px;
+}
+
+.sidebar-brand .name span { color: var(--accent-purple); }
+
+/* Nav */
+.sidebar-nav {
+  flex: 1;
+  padding: var(--space-md);
+  display: flex; flex-direction: column; gap: var(--space-xs);
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease-out;
+  border: none; background: none;
+  width: 100%; text-align: left;
+  font-family: var(--font-sans);
+}
+
+.nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+.nav-item.active {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-left: 3px solid var(--accent-blue);
+  padding-left: 9px;
+  border-radius: 0 8px 8px 0;
+}
+
+.nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+.nav-item.active svg { color: var(--accent-blue); }
+
+/* Sidebar footer */
+.sidebar-footer {
+  padding: var(--space-md);
+  border-top: 1px solid var(--border);
+}
+
+/* Service Links */
+.svc-section {
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.svc-header {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: var(--space-xs) var(--space-xs) var(--space-sm);
+}
+
+.svc-item {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 150ms;
+  text-decoration: none;
+  margin-bottom: 2px;
+}
+
+.svc-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+.svc-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+
+.svc-dot.up { background: var(--accent-green); }
+.svc-dot.down { background: var(--accent-red); }
+.svc-dot.checking { background: var(--accent-amber); animation: statusPulse 2s infinite ease-in-out; }
+
+.svc-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.svc-ext {
+  width: 14px; height: 14px; opacity: 0.4;
+  flex-shrink: 0;
+  transition: opacity 150ms;
+}
+
+.svc-item:hover .svc-ext { opacity: 0.8; }
+
+.status-row {
+  display: flex; align-items: center; gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent-green);
+  animation: statusPulse 2s infinite ease-in-out;
+}
+
+.status-dot.idle { background: var(--accent-amber); animation: none; }
+.status-dot.error { background: var(--accent-red); animation: none; }
+.status-dot.offline { background: var(--text-muted); animation: none; }
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.status-text { font-size: 13px; color: var(--text-secondary); }
+.sidebar-time { font-size: 13px; color: var(--text-muted); font-family: var(--font-mono); }
+
+/* ========== MAIN CONTENT ========== */
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  padding: var(--space-xl);
+  min-width: 0;
+}
+
+/* Header */
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.header h1 { font-size: 28px; font-weight: 700; }
+
+.header-actions {
+  display: flex; align-items: center; gap: var(--space-md);
+}
+
+.header-time { font-size: 13px; color: var(--text-muted); font-family: var(--font-mono); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+}
+
+.btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.btn:active { transform: scale(0.97); }
+.btn:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
+
+.btn svg { width: 16px; height: 16px; }
+
+/* Stat Cards */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+
+.stat-label { font-size: 13px; color: var(--text-muted); margin-bottom: var(--space-sm); }
+.stat-number { font-family: var(--font-mono); font-size: 32px; font-weight: 700; color: var(--accent-blue); }
+.stat-number.green { color: var(--accent-green); }
+.stat-number.red { color: var(--accent-red); }
+.stat-number.purple { color: var(--accent-purple); }
+.stat-change { font-size: 13px; margin-top: var(--space-sm); display: flex; align-items: center; gap: 4px; }
+.stat-change.up { color: var(--accent-green); }
+.stat-change.down { color: var(--accent-red); }
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-lg);
+}
+
+.tab-btn {
+  padding: 12px 20px;
+  font-size: 14px; font-weight: 500;
+  color: var(--text-muted);
+  background: none; border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 150ms ease-out;
+  font-family: var(--font-sans);
+  position: relative; top: 1px;
+}
+
+.tab-btn:hover { color: var(--text-secondary); }
+
+.tab-btn.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent-blue);
+}
+
+.tab-btn:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: -2px; }
+
+/* Tab Content */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Section Title */
+.section-title {
+  font-size: 16px; font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+}
+
+/* Card (genel) */
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+/* Bar Chart (CSS-only) */
+.mini-chart { display: flex; flex-direction: column; gap: var(--space-sm); }
+
+.chart-row {
+  display: flex; align-items: center; gap: var(--space-md);
+}
+
+.chart-label {
+  min-width: 100px;
+  font-size: 13px; color: var(--text-secondary);
+  text-align: right;
+}
+
+.chart-track {
+  flex: 1;
+  height: 20px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.chart-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 600ms ease-out;
+}
+
+.chart-bar.blue { background: linear-gradient(90deg, var(--accent-blue), #60a5fa); }
+.chart-bar.green { background: linear-gradient(90deg, var(--accent-green), #34d399); }
+.chart-bar.purple { background: linear-gradient(90deg, var(--accent-purple), #a78bfa); }
+.chart-bar.amber { background: linear-gradient(90deg, var(--accent-amber), #fbbf24); }
+
+.chart-val {
+  min-width: 48px;
+  font-size: 13px; color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* Table */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tbl th {
+  text-align: left; padding: 10px 12px;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.tbl td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tbl tr:nth-child(even) td { background: rgba(26,35,50,0.3); }
+.tbl tr:hover td { background: var(--bg-tertiary); }
+
+/* Status Badge */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-size: 12px; font-weight: 500;
+}
+
+.badge::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+}
+
+.badge.active { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+.badge.active::before { background: var(--accent-green); }
+.badge.idle { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+.badge.idle::before { background: var(--accent-amber); }
+.badge.error { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+.badge.error::before { background: var(--accent-red); }
+.badge.offline { background: rgba(100,116,139,0.15); color: var(--text-muted); }
+.badge.offline::before { background: var(--text-muted); }
+
+/* Skill Grid */
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-md);
+}
+
+.skill-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex; align-items: center; gap: var(--space-md);
+  transition: background 150ms;
+}
+
+.skill-item:hover { background: var(--bg-tertiary); }
+
+.skill-dot {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; flex-shrink: 0;
+}
+
+.skill-dot.gold { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+.skill-dot.silver { background: rgba(148,163,184,0.15); color: var(--text-secondary); }
+.skill-dot.bronze { background: rgba(100,116,139,0.15); color: var(--text-muted); }
+
+.skill-info { flex: 1; min-width: 0; }
+
+.skill-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+.skill-tag {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 100px;
+  font-size: 11px; font-weight: 500;
+}
+
+.skill-tag.tested { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+.skill-tag.pending { background: rgba(100,116,139,0.15); color: var(--text-muted); }
+
+/* Network Table */
+.rbar {
+  display: flex; align-items: center; gap: var(--space-sm);
+}
+
+.name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.net { font-size: 14px; color: var(--text-muted); font-family: var(--font-mono); }
+
+/* Progress Bar */
+.progress-track {
+  width: 100%; height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 600ms ease-out;
+}
+
+.progress-fill.high { background: var(--accent-red); }
+.progress-fill.medium { background: var(--accent-amber); }
+.progress-fill.low { background: var(--accent-green); }
+
+/* Log Box */
+.log-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  max-height: 300px; overflow-y: auto;
+  line-height: 1.6;
+}
+
+.log-line { padding: 2px 0; white-space: pre-wrap; word-break: break-all; }
+.log-line.info { color: var(--text-secondary); }
+.log-line.warn { color: var(--accent-amber); }
+.log-line.error { color: var(--accent-red); }
+.log-line.success { color: var(--accent-green); }
+.log-line.debug { color: var(--text-muted); }
+
+.log-timestamp { color: var(--text-muted); margin-right: 8px; }
+
+/* Loading shimmer */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-elevated) 50%, var(--bg-tertiary) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Fade animation */
+.fade-in { animation: fadeIn 200ms ease-out; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 1023px) {
+  .sidebar { width: 64px; min-width: 64px; }
+  .sidebar .nav-item span, .sidebar .name span, .sidebar .status-text { display: none; }
+  .sidebar .nav-item { justify-content: center; padding: 10px; }
+  .sidebar .nav-item.active { border-left: none; border-bottom: 3px solid var(--accent-blue); padding: 10px 10px 7px; border-radius: 0; }
+  .sidebar-brand { justify-content: center; }
+  .sidebar-brand .name { display: none; }
+  .main-content { margin-left: 64px; }
+}
+
+@media (max-width: 767px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+  .header h1 { font-size: 22px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .stat-number { font-size: 24px; }
+  .tabs { overflow-x: auto; }
+  .tab-btn { padding: 10px 14px; white-space: nowrap; }
+  .skill-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}
+/* Chart styles */
+.chart-section { margin-bottom: var(--space-lg); }
+.chart-title { font-size: 13px; color: var(--text-muted); margin-bottom: var(--space-sm); font-weight: 500; }
+.chart-container { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md); }
+.chart-bars { display: flex; align-items: flex-end; gap: 1px; height: 120px; padding: 4px 0; min-width: 100%; }
+.chart-bar-item { flex: 1; min-width: 2px; border-radius: 1px 1px 0 0; transition: height 400ms ease-out; position: relative; }
+.chart-bar-item:hover { opacity: 0.8; }
+.chart-bar-item .tooltip { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--bg-elevated); color: var(--text-primary); padding: 2px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; z-index: 10; pointer-events: none; }
+.chart-bar-item:hover .tooltip { display: block; }
+.chart-legend { display: flex; gap: var(--space-md); margin-top: var(--space-sm); font-size: 11px; color: var(--text-muted); }
+.chart-legend span { display: flex; align-items: center; gap: 4px; }
+.chart-legend .dot { width: 8px; height: 8px; border-radius: 2px; }
+.skeleton { background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-elevated) 50%, var(--bg-tertiary) 75%); background-size: 400px 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm); height: 120px; }
+.empty-state { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 14px; }
+
+/* Alert Toast */
+.alert-container {
+  position: fixed; top: 16px; right: 16px;
+  z-index: 200;
+  display: flex; flex-direction: column; gap: 8px;
+  max-width: 360px;
+}
+.alert-toast {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent-blue);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 13px;
+  animation: slideInRight 300ms ease-out;
+  display: flex; align-items: flex-start; gap: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.alert-toast.warn { border-left-color: var(--accent-amber); }
+.alert-toast.error { border-left-color: var(--accent-red); }
+.alert-toast.success { border-left-color: var(--accent-green); }
+.alert-toast .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-toast .alert-msg { flex: 1; color: var(--text-secondary); }
+.alert-toast .alert-close { cursor: pointer; color: var(--text-muted); font-size: 16px; line-height: 1; }
+@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* Stats refresh indicator */
+.stat-refreshing { opacity: 0.6; transition: opacity 200ms; }
+</style>
+</head>
+<body>
+
+<!-- ==================== SIDEBAR ==================== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">K</div>
+    <div class="name">KOCU<span>MO</span></div>
+  </div>
+  <nav class="sidebar-nav" role="navigation" aria-label="Ana menü">
+    <button class="nav-item active" data-tab="overview" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Genel Bakış</span>
+    </button>
+    <button class="nav-item" data-tab="containers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span>Konteyner</span>
+    </button>
+    <button class="nav-item" data-tab="skills">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.91 8.84L14.4 2H9.6L3.09 8.84a6 6 0 0 0 8.49 8.49L12 17l.42.33a6 6 0 0 0 8.49-8.49Z"/></svg>
+      <span>Skills</span>
+    </button>
+    <button class="nav-item" data-tab="network">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/><path d="M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10"/></svg>
+      <span>Network</span>
+    </button>
+    <button class="nav-item" data-tab="logs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Loglar</span>
+    </button>
+  </nav>
+  <div class="svc-section" id="svcSection">
+    <div class="svc-header">📡 Servisler</div>
+    <a class="svc-item" href="https://hermes.kocumo.com" target="_blank" data-svc="hermes">
+      <span class="svc-dot checking"></span>
+      <span class="svc-name">🧠 Hermes WebUI</span>
+      <svg class="svc-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+    <a class="svc-item" href="https://n8n.kocumo.com" target="_blank" data-svc="n8n">
+      <span class="svc-dot checking"></span>
+      <span class="svc-name">⚙️ n8n Otomasyon</span>
+      <svg class="svc-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+    <a class="svc-item" href="https://openclaw.kocumo.com" target="_blank" data-svc="openclaw">
+      <span class="svc-dot checking"></span>
+      <span class="svc-name">🦅 OpenClaw Gateway</span>
+      <svg class="svc-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+    <a class="svc-item" href="https://langfuse.kocumo.com" target="_blank" data-svc="langfuse">
+      <span class="svc-dot checking"></span>
+      <span class="svc-name">📈 Langfuse LLM Ops</span>
+      <svg class="svc-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+    <a class="svc-item" href="https://monitor.kocumo.com" target="_blank" data-svc="monitor">
+      <span class="svc-dot checking"></span>
+      <span class="svc-name">🟢 Uptime Kuma</span>
+      <svg class="svc-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+    <a class="svc-item" href="https://panel.kocumo.com" target="_blank" data-svc="panel">
+      <span class="svc-dot checking"></span>
+      <span class="svc-name">📎 Paperclip Panel</span>
+      <svg class="svc-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+    <a class="svc-item" href="https://tarabyabirey.com" target="_blank" data-svc="tarabya">
+      <span class="svc-dot checking"></span>
+      <span class="svc-name">🏫 Tarabya Birey</span>
+      <svg class="svc-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="status-row">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-text" id="statusText">Aktif</span>
+    </div>
+    <div class="sidebar-time" id="sidebarTime">--:--:--</div>
+  </div>
+</aside>
+
+<!-- ==================== MAIN CONTENT ==================== -->
+<main class="main-content" id="mainContent">
+  <!-- Alert Container -->
+  <div class="alert-container" id="alertContainer"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <h1 class="fade-in">Paperclip Dashboard</h1>
+    <div class="header-actions">
+      <span class="header-time" id="headerTime">--:--:--</span>
+      <button class="btn" onclick="fetchData()" aria-label="Yenile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Yenile
+      </button>
+    </div>
+  </header>
+
+  <!-- Stat Cards -->
+  <section class="stat-grid" aria-label="Özet istatistikler">
+    <div class="stat-card">
+      <div class="stat-label">Aktif Agent</div>
+      <div class="stat-number purple" id="statAgents">6</div>
+      <div class="stat-change up"><span>▲</span> 1 yeni</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Çalışan Skill</div>
+      <div class="stat-number green" id="statSkills">17/52</div>
+      <div class="stat-change up"><span>▲</span> 3 aktif</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Son 24s İşlem</div>
+      <div class="stat-number" id="statOps">247</div>
+      <div class="stat-change up"><span>▲</span> %12</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sistem Yükü</div>
+      <div class="stat-number green" id="statLoad">42%</div>
+      <div class="stat-change down"><span>▼</span> %5 düşüş</div>
+    </div>
+  </section>
+
+  <!-- Tabs -->
+  <nav class="tabs" role="tablist" aria-label="İçerik sekmeleri">
+    <button class="tab-btn active" data-tab="overview" role="tab" aria-selected="true">Genel Bakış</button>
+    <button class="tab-btn" data-tab="containers" role="tab">Konteyner</button>
+    <button class="tab-btn" data-tab="skills" role="tab">Skills</button>
+    <button class="tab-btn" data-tab="network" role="tab">Network</button>
+    <button class="tab-btn" data-tab="logs" role="tab">Loglar</button>
+  </nav>
+
+  <!-- ===== TAB: Genel Bakış ===== -->
+  <section class="tab-content active" id="tab-overview" role="tabpanel">
+    <div class="chart-section">
+      <div class="chart-title">📊 CPU Kullanımı — Son 12 Saat</div>
+      <div class="chart-container"><div class="chart-bars" id="chart-cpu"><div class="skeleton"></div></div></div>
+    </div>
+    <div class="chart-section">
+      <div class="chart-title">📦 Aktif Konteyner — Son 12 Saat</div>
+      <div class="chart-container"><div class="chart-bars" id="chart-containers"><div class="skeleton"></div></div></div>
+    </div>
+    <div class="chart-legend">
+      <span><span class="dot" style="background:var(--accent-blue)"></span> CPU</span>
+      <span><span class="dot" style="background:var(--accent-green)"></span> Konteyner</span>
+    </div>
+  </section>
+
+  <!-- ===== TAB: Konteyner ===== -->
+  <section class="tab-content" id="tab-containers" role="tabpanel">
+    <h2 class="section-title">Çalışan Servisler</h2>
+    <div class="card">
+      <table class="tbl" id="servicesTable">
+        <thead>
+          <tr><th>Servis</th><th>CPU</th><th>RAM</th><th>Durum</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== TAB: Skills ===== -->
+  <section class="tab-content" id="tab-skills" role="tabpanel">
+    <h2 class="section-title">Skill Durumu</h2>
+    <div class="skill-grid" id="skillGrid"></div>
+  </section>
+
+  <!-- ===== TAB: Network ===== -->
+  <section class="tab-content" id="tab-network" role="tabpanel">
+    <h2 class="section-title">Ağ Bağlantıları</h2>
+    <div class="card">
+      <table class="tbl" id="networkTable">
+        <thead>
+          <tr><th>Agent</th><th>Endpoint</th><th>Gecikme</th><th>Durum</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== TAB: Loglar ===== -->
+  <section class="tab-content" id="tab-logs" role="tabpanel">
+    <h2 class="section-title">Sistem Logları</h2>
+    <div class="log-box" id="logBox"></div>
+  </section>
+
+</main>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script>
+/* ============================================================
+   KOCUMO Dashboard — Application Logic
+   Pure vanilla JS | Zero dependencies
+   ============================================================ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  logAdd('info', 'Dashboard başlatıldı — Paperclip v2.0');
+  render();
+});
+
+// ── Time ────────────────────────────────────────────────
+function updateTime() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Istanbul' });
+  const d = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Istanbul' });
+  document.getElementById('headerTime').textContent = d + ' ' + t;
+  document.getElementById('sidebarTime').textContent = t;
+}
+
+// ── Refresh ──────────────────────────────────────────────
+function refresh() {
+  logAdd('info', '🔄 Sayfa yenilendi');
+  render();
+}
+
+// ── NAV & TAB HANDLERS ───────────────────────────────────
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+function switchTab(tabId) {
+  // Update nav items
+  document.querySelectorAll('.nav-item').forEach(i => {
+    i.classList.toggle('active', i.dataset.tab === tabId);
+    i.setAttribute('aria-current', i.dataset.tab === tabId ? 'page' : 'false');
+  });
+
+  // Update tab buttons
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabId);
+    b.setAttribute('aria-selected', b.dataset.tab === tabId ? 'true' : 'false');
+  });
+
+  // Show active tab content
+  document.querySelectorAll('.tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === 'tab-' + tabId);
+  });
+
+  logAdd('debug', `Sekme değişti: ${tabId}`);
+}
+
+// ── RENDER ALL ───────────────────────────────────────────
+let dashboardData = null;
+
+async function fetchData() {
+  try {
+    const res = await fetch('/stats.json?' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    dashboardData = await res.json();
+    render();
+    showAlert('Veriler güncellendi — ' + dashboardData.updated, 'success');
+  } catch(e) {
+    showAlert('Veri alınamadı: ' + e.message, 'error');
+    renderFallback();
+  }
+}
+
+function render() {
+  updateTime();
+  if (!dashboardData) return;
+  updateStatCards();
+  renderChart('chart-cpu', dashboardData.history?.last12h || [], 'totalCPU', 'cpu', 'CPU %');
+  renderChart('chart-containers', dashboardData.history?.last12h || [], 'activeContainers', 'containers', 'Container');
+  renderServices();
+  renderSkills();
+  renderNetwork();
+  renderLogs();
+  checkServices();
+}
+
+function renderFallback() {
+  updateTime();
+  document.querySelectorAll('.chart-container').forEach(el => {
+    el.innerHTML = '<div class="empty-state">⏳ Veri bekleniyor...</div>';
+  });
+}
+
+function updateStatCards() {
+  const d = dashboardData;
+  document.getElementById('statAgents').textContent = d.activeContainers || d.totalContainers || '—';
+  document.getElementById('statSkills').textContent = (d.totalSkills || '—') + ' skill';
+  document.getElementById('statOps').textContent = d.totalContainers || '—';
+  document.getElementById('statLoad').textContent = d.host?.load || '—';
+}
+
+// ── Chart Renderer ───────────────────────────────────────
+function renderChart(elId, data, key, theme, label) {
+  const el = document.getElementById(elId);
+  if (!el || !data.length) { if(el) el.innerHTML = '<div class="empty-state">Henüz veri yok</div>'; return; }
+  const max = Math.max(...data.map(d => d[key] || 0), 1);
+  const colors = { cpu: 'var(--accent-blue)', containers: 'var(--accent-green)', skills: 'var(--accent-purple)', network: 'var(--accent-amber)' };
+  const color = colors[theme] || 'var(--accent-blue)';
+
+  el.innerHTML = data.slice(-72).map(d => {
+    const val = d[key] || 0;
+    const h = Math.max((val / max) * 110, 2);
+    const ts = (d.ts || '').slice(11, 16);
+    return `<div class="chart-bar-item" style="height:${h}px;background:${color}" title="${label}: ${val} @ ${ts}"><span class="tooltip">${val}<br>${ts}</span></div>`;
+  }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  logAdd('info', 'Dashboard başlatıldı — AUR-114 v3');
+  fetchData();
+});
+// ── Services Table (CANLI VERI) ──────────────────────────
+async function renderServices() {
+  const el = document.querySelector('#servicesTable tbody');
+  if (!el) return;
+  
+  try {
+    const res = await fetch('/stats.json?' + Date.now());
+    if (!res.ok) throw new Error('stats yok');
+    const data = await res.json();
+    const svc = data.containers || [];
+    
+    el.innerHTML = svc.map(s => `
+      <tr>
+        <td><strong>${s.name}</strong></td>
+        <td style="font-family:var(--font-mono);font-size:13px">
+          <div class="progress-track" style="width:80px;display:inline-block;vertical-align:middle;margin-right:8px">
+            <div class="progress-fill ${s.cpuPct > 30 ? 'high' : s.cpuPct > 15 ? 'medium' : 'low'}" style="width:${Math.min(s.cpuPct,100)}%"></div>
+          </div>${s.cpuPct.toFixed(1)}%
+        </td>
+        <td style="font-family:var(--font-mono);font-size:13px">${s.mem}</td>
+        <td><span class="badge ${s.status}">${s.status === 'active' ? 'Aktif' : s.status === 'idle' ? 'Bekliyor' : 'Hata'}</span></td>
+      </tr>`).join('');
+    
+    document.getElementById('statOps').textContent = data.totalContainers || svc.length;
+    document.getElementById('statLoad').textContent = data.hostLoad || '—';
+  } catch(e) {
+    // Fallback: statik veri
+    const svc = [
+      { name: 'HERMES Agent', cpuPct: 42, mem: '256MB', status: 'active' },
+      { name: 'PAPERCLAW (CEO)', cpuPct: 2, mem: '32MB', status: 'idle' },
+      { name: 'PostgreSQL', cpuPct: 15, mem: '512MB', status: 'active' },
+      { name: 'n8n Otomasyon', cpuPct: 8, mem: '384MB', status: 'active' },
+      { name: 'Redis Cache', cpuPct: 1, mem: '64MB', status: 'active' },
+      { name: 'OpenClaw Gateway', cpuPct: 3, mem: '128MB', status: 'active' },
+      { name: 'Qdrant Vector', cpuPct: 5, mem: '256MB', status: 'active' },
+      { name: 'DeepSeek Engine', cpuPct: 35, mem: '512MB', status: 'active' },
+    ];
+    el.innerHTML = svc.map(s => `
+      <tr><td><strong>${s.name}</strong></td>
+        <td style="font-family:var(--font-mono);font-size:13px">
+          <div class="progress-track" style="width:80px;display:inline-block;vertical-align:middle;margin-right:8px">
+            <div class="progress-fill ${s.cpuPct > 30 ? 'high' : s.cpuPct > 15 ? 'medium' : 'low'}" style="width:${s.cpuPct}%"></div>
+          </div>${s.cpuPct}%</td>
+        <td style="font-family:var(--font-mono);font-size:13px">${s.mem}</td>
+        <td><span class="badge ${s.status}">${s.status === 'active' ? 'Aktif' : 'Bekliyor'}</span></td></tr>`).join('');
+  }
+}
+
+// ── Skills Grid (CANLI) ──────────────────────────────────
+function renderSkills() {
+  const el = document.getElementById('skillGrid');
+  if (!el) return;
+  const skills = (dashboardData && dashboardData.skills) ? dashboardData.skills : [];
+  if (!skills.length) { el.innerHTML = '<div class="empty-state">Skill verisi yok</div>'; return; }
+
+  const tierIcon = { gold: '★', silver: '◆', bronze: '●' };
+  el.innerHTML = skills.map(s => `
+    <div class="skill-item">
+      <div class="skill-dot ${s.tier || 'bronze'}">${tierIcon[s.tier] || '●'}</div>
+      <div class="skill-info">
+        <div class="skill-name">${s.name}</div>
+        <span class="skill-tag ${s.tested ? 'tested' : 'pending'}">${s.tested ? '✅' : '⏳'} ${s.active ? 'Aktif' : 'Pasif'}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ── Network Table (CANLI) ────────────────────────────────
+function renderNetwork() {
+  const el = document.querySelector('#networkTable tbody');
+  if (!el) return;
+  const net = (dashboardData && dashboardData.network) ? dashboardData.network : [];
+  if (!net.length) { el.innerHTML = '<tr><td colspan="4" class="empty-state">Veri yok</td></tr>'; return; }
+
+  el.innerHTML = net.map(n => `
+    <tr>
+      <td><div class="rbar"><span class="name">${n.agent}</span></div></td>
+      <td><span class="net">${n.endpoint}</span></td>
+      <td style="font-family:var(--font-mono);font-size:13px">${n.latency}</td>
+      <td><span class="badge ${n.status}">${n.status === 'active' ? 'Bağlı' : 'Bekliyor'}</span></td>
+    </tr>`).join('');
+}
+
+// ── Log Box (CANLI) ─────────────────────────────────────
+function renderLogs() {
+  const el = document.getElementById('logBox');
+  if (!el) return;
+  const logs = (dashboardData && dashboardData.logs) ? dashboardData.logs : _logs;
+  if (!logs.length) { el.innerHTML = '<div class="empty-state">Log yok</div>'; return; }
+
+  el.innerHTML = logs.map(l => {
+    const cls = l.type === 'warn' ? 'warn' : l.type === 'error' ? 'error' : l.type === 'success' ? 'success' : 'info';
+    return `<div class="log-line ${cls}"><span class="log-timestamp">${l.ts}</span> ${l.msg}</div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── Status Indicator ─────────────────────────────────────
+function updateStatus() {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot';
+  txt.textContent = 'Aktif';
+}
+
+// ── Service Status Check ─────────────────────────────────
+const SERVICES = [
+  { id: 'hermes',   url: 'https://hermes.kocumo.com' },
+  { id: 'n8n',      url: 'https://n8n.kocumo.com' },
+  { id: 'openclaw', url: 'https://openclaw.kocumo.com' },
+  { id: 'langfuse', url: 'https://langfuse.kocumo.com' },
+  { id: 'monitor',  url: 'https://monitor.kocumo.com' },
+  { id: 'panel',    url: 'https://panel.kocumo.com' },
+  { id: 'tarabya',  url: 'https://tarabyabirey.com' },
+];
+
+async function checkServices() {
+  for (const svc of SERVICES) {
+    try {
+      await new Promise((resolve, reject) => {
+        const img = new Image();
+        const tid = setTimeout(() => { img.src = ''; reject(new Error('timeout')); }, 5000);
+        img.onload = () => { clearTimeout(tid); resolve(true); };
+        img.onerror = () => { clearTimeout(tid); resolve(true); }; // any response = up
+        img.src = svc.url + '/favicon.ico?' + Date.now();
+      });
+      setSvcStatus(svc.id, true);
+    } catch {
+      setSvcStatus(svc.id, false);
+    }
+  }
+}
+
+function setSvcStatus(id, up) {
+  const el = document.querySelector(`.svc-item[data-svc="${id}"] .svc-dot`);
+  if (!el) return;
+  el.className = 'svc-dot ' + (up ? 'up' : 'down');
+  el.title = up ? 'Çalışıyor' : 'Erişilemiyor';
+}
+
+// ── Start Clock + Auto-refresh ──────────────────────────
+setInterval(updateTime, 1000);
+setInterval(fetchData, 30000); // 30sn otomatik yenile
+
+let _logs = [];
+function addLog(type, msg) { _logs.push({ts:new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),type,msg}); if(_logs.length>200)_logs.shift(); }
+
+// ── Alert Notification System ──────────────────────────
+function showAlert(msg, type) {
+  type = type || 'info';
+  const icons = { info: 'ℹ️', warn: '⚠️', error: '❌', success: '✅' };
+  const container = document.getElementById('alertContainer');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = 'alert-toast ' + type;
+  toast.innerHTML = `<span class="alert-icon">${icons[type]||icons.info}</span><span class="alert-msg">${msg}</span><span class="alert-close" onclick="this.parentElement.remove()">×</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { if (toast.parentElement) toast.remove(); }, 6000);
+}
+</script>
+
+</body>
+</html>
